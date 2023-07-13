@@ -27,6 +27,8 @@ struct 绘制信息结构体{
     bool 观战;
     bool 骨骼;
     bool 帧率;
+    bool 阵营;
+    bool 人数;
 
     bool 自瞄圈;
     bool 雷达圈;
@@ -34,20 +36,27 @@ struct 绘制信息结构体{
 
 struct 颜色结构体{
     ImColor 方框颜色 = ImColor(200,255,0,255);
-    ImColor 真人射线颜色 = ImColor(0,255,0,255);
-    ImColor 人机射线颜色 = ImColor(255,255,255,255);
+    ImColor 真人射线颜色 = ImColor(0,255,255,255);
     ImColor 骨骼颜色 = ImColor(200,255,0,255);
 	ImColor 随机颜色[1000] = {};
 }颜色;
 struct 功能结构体{
     bool 除草;
+    bool 无后;
+    bool 加速;
+    bool 自瞄;
 }功能;
 
 struct 数值结构体
 {
-    float 屏幕X = 1080;
-    float 屏幕Y = 2400;
+    float 屏幕X = 0;
+    float 屏幕Y = 0;
 
+    int 主题选项 = 2;
+
+    float 射线宽 = 1.8f;
+    float 方框宽 = 1.8f;
+    float 骨骼宽 = 1.8f;
 }数值;
 
 struct 绘制{
@@ -96,7 +105,7 @@ Java_com_empty_open_GLES3JNIView_init(JNIEnv* env, jclass cls){
 
     ImGui_ImplAndroid_Init();
     ImGui_ImplOpenGL3_Init("#version 300 es");
-    配置.字体指针 = io.Fonts->AddFontFromMemoryTTF((void *)FontFile, Fontsize, 39.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
+    配置.字体指针 = io.Fonts->AddFontFromMemoryTTF((void *)FontFile, Fontsize, 30.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
     IM_ASSERT(配置.字体指针 != NULL);
 
     ImGui::GetStyle().ScaleAllSizes(3.0f);
@@ -145,14 +154,13 @@ void ESP()
 
     }
 }
-void BeginDraw()
-{
+void BeginDraw() {
 
     ImGuiIO &io = ImGui::GetIO();
     //UI窗体背景色
-    ImGuiStyle& style = ImGui::GetStyle();
-    io.ConfigWindowsMoveFromTitleBarOnly = true;
-    io.WantSaveIniSettings=true;
+    ImGuiStyle &style = ImGui::GetStyle();
+    io.ConfigWindowsMoveFromTitleBarOnly = false;
+    io.WantSaveIniSettings = true;
     style.FramePadding = ImVec2(16, 16);
     style.WindowRounding = 10.0f;
     style.FrameRounding = 5.0f;
@@ -165,27 +173,87 @@ void BeginDraw()
     style.GrabRounding = 10.0f;
     // 滑块宽度
     style.GrabMinSize = 10.0f;
-    style.Colors[ImGuiCol_TitleBg] = ImColor(255, 101, 53, 255);
-    style.Colors[ImGuiCol_TitleBgActive] = ImColor(76, 125, 205, 200);
-    style.Colors[ImGuiCol_TitleBgCollapsed] = ImColor(ImVec4(1.0, 1.0, 1.0, 0.55));
-    style.Colors[ImGuiCol_Text] = ImColor(0,0,0,255);
-    style.Colors[ImGuiCol_Button] = ImColor(ImVec4(76/255.0, 125/255.0, 205/255.0, 200/255.0));
-    style.Colors[ImGuiCol_ButtonActive] = ImColor(ImVec4(0.619, 0.313, 0.685, 0.5));
-    style.Colors[ImGuiCol_ButtonHovered] = ImColor(ImVec4(0.619, 0.313, 0.685, 0.5));
-    style.Colors[ImGuiCol_FrameBg] = ImColor(255,255,255,180);
-    style.Colors[ImGuiCol_FrameBgActive] = ImColor(ImVec4(0.619, 0.313, 0.685, 0.5));
-    style.Colors[ImGuiCol_FrameBgHovered] = ImColor(ImVec4(0.619, 0.313, 0.685, 0.5));
-    style.Colors[ImGuiCol_Header] = ImVec4(76/255.0, 125/255.0, 205/255.0, 200/255.0);
-    style.Colors[ImGuiCol_HeaderActive] = ImColor(ImVec4(0.619, 0.313, 0.685, 0.5));
-    style.Colors[ImGuiCol_HeaderHovered] = ImColor(ImVec4(0.619, 0.313, 0.685, 0.5));
     //窗体边框圆角
     style.WindowRounding = 10.0f;
-    if (ImGui::Begin("\tImGui Study\t",NULL,0))
-    {
+    if (ImGui::Begin("\tImGui Study\t", NULL, 0)) {
         g_window = ImGui::GetCurrentWindow();
-        ImGui::SetWindowSize({960, 1300}, ImGuiCond_Once);
         ImGui::SetWindowPos({15, 250}, ImGuiCond_Once);
+        ImGui::SetWindowSize({数值.屏幕X-30,-1},ImGuiCond_Once);
+        if (ImGui::BeginTabBar("Tab", ImGuiTabBarFlags_NoCloseWithMiddleMouseButton | ImGuiTabBarFlags_NoTabListScrollingButtons)) {
+            //菜单标题
+            if (ImGui::BeginTabItem("\t绘制\t")) {
+                ImGui::Checkbox("方框", &绘制.方框);
+                ImGui::SameLine();
+                ImGui::Checkbox("射线", &绘制.射线);
+                ImGui::SameLine();
+                ImGui::Checkbox("距离", &绘制.距离);
+                ImGui::SameLine();
+                ImGui::Checkbox("阵营", &绘制.阵营);
 
+                ImGui::Checkbox("昵称", &绘制.昵称);
+                ImGui::SameLine();
+                ImGui::Checkbox("血量", &绘制.血量);
+                ImGui::SameLine();
+                ImGui::Checkbox("人数", &绘制.人数);
+                ImGui::SameLine();
+                ImGui::Checkbox("骨骼", &绘制.骨骼);
+
+                ImGui::Checkbox("雷达", &绘制.雷达);
+                ImGui::SameLine();
+                ImGui::Checkbox("观战", &绘制.观战);
+                ImGui::SameLine();
+                ImGui::Checkbox("帧率", &绘制.帧率);
+
+                ImGui::ColorEdit4("方框颜色", (float *) &颜色.方框颜色);
+                ImGui::ColorEdit4("射线颜色", (float *) &颜色.真人射线颜色);
+                ImGui::ColorEdit4("骨骼颜色", (float *) &颜色.骨骼颜色);
+
+
+                ImGui::SliderFloat("射线宽", &数值.射线宽, 1, 6);
+                ImGui::SliderFloat("方框宽", &数值.方框宽, 1, 6);
+                ImGui::SliderFloat("骨骼宽", &数值.骨骼宽, 1, 4);
+
+                //这个菜单页面结束
+                ImGui::EndTabItem();
+            }
+
+            if (ImGui::BeginTabItem("\t功能\t"))
+            {
+                ImGui::Checkbox("除草", &功能.除草);
+                ImGui::SameLine();
+                ImGui::Checkbox("无后", &功能.无后);
+                ImGui::SameLine();
+                ImGui::Checkbox("加速", &功能.加速);
+                ImGui::SameLine();
+                ImGui::Checkbox("自瞄", &功能.自瞄);
+
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("\t设置\t")) {
+
+
+                if (ImGui::Combo("主题颜色", &数值.主题选项, "胖次蓝\0胖次紫\0胖次白\0")) {
+                    switch (数值.主题选项) {
+                        case 0:
+                            ImGui::StyleColorsDark();
+                            break;
+                        case 1:
+                            ImGui::StyleColorsClassic();
+                            break;
+                        case 2:
+                            ImGui::StyleColorsLight();
+                            break;
+                    }
+                }
+
+                ImGui::Text("注意：绘制默认以手机最大帧率运行！部分设备限制！");
+                ImGui::Text("绘制耗时 %.3f ms (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+
+                ImGui::EndTabBar();
+
+            }
+        }
+        ImGui::EndTabItem();
     }
 }
 void EndDraw()
@@ -196,7 +264,9 @@ void EndDraw()
 }
 
 
-extern "C" __attribute__((unused)) JNIEXPORT void JNICALL Java_com_empty_open_GLES3JNIView_step(__attribute__((unused)) JNIEnv* env,__attribute__((unused)) jclass obj) {
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_empty_open_GLES3JNIView_step(JNIEnv* env,jclass obj) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplAndroid_NewFrame(数值.屏幕X,  数值.屏幕Y);
     ImGui::NewFrame();
@@ -235,7 +305,7 @@ JNIEXPORT jstring JNICALL Java_com_empty_open_GLES3JNIView_getWindowRect(JNIEnv 
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_empty_open_GLES3JNIView_real(JNIEnv* env,__attribute__((unused)) jclass obj,jfloat w, jfloat h){
+Java_com_empty_open_GLES3JNIView_real(JNIEnv* env,jclass obj,jfloat w, jfloat h){
     数值.屏幕X = w;
     数值.屏幕Y = h;
 }

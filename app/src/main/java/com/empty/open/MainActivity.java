@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -13,10 +12,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 /**
- * Create By.阿夜 该项目已在github开源 有兴趣的小伙伴欢迎给个 start
+ * 该项目已在github开源 有兴趣的小伙伴欢迎给个 start
  * 2022.09.27
  * AIDE全解 带注释给小白学习用
- **/
+ *
+ * @author 阿夜*/
 public class MainActivity extends AppCompatActivity {
 
     static {
@@ -54,12 +54,12 @@ public class MainActivity extends AppCompatActivity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         //隐藏状态栏
 
-        init();
+        获取权限();
 
         Functions.OutFiles(MainActivity.this, getFilesDir() + "/assets", "draw");
     }
 
-    private void init() //初始化软件
+    private void 获取权限() //初始化软件
     {
         if (Settings.canDrawOverlays(getApplicationContext())) {
             //判断悬浮窗权限
@@ -90,6 +90,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * native 使用反射 调用二进制
+     * @param name 传入shell 命令 这是一个反射的接口
+     */
     public void call(String name) {
         //jni反射调用，传递二进制路径
         if (Functions.isRoot()) {

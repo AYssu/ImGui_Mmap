@@ -47,11 +47,11 @@
 					android:layout_marginBottom="15dp"
 					android:shadowColor="#FFFF0000"
 					android:shadowRadius="0.7"
-					android:text="荷花 Pro"
+					android:text="ImGui 开源学习插件"
 					android:textColor="#FFFFFFFF"
 					android:textSize="15sp"
 					android:textStyle="bold"
-					android:typeface="monospace"/>
+					android:typeface="monospace" />
 
 				<LinearLayout
 					android:layout_width="match_parent"
