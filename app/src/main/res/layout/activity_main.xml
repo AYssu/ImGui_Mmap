@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@drawable/background"
+	android:id="@+id/activityTheme">
+
+	<FrameLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+
+		<LinearLayout
+			android:id="@+id/MOde"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:orientation="vertical">
+
+			<LinearLayout
+				android:id="@+id/Themetop"
+				android:layout_width="match_parent"
+				android:layout_height="420dp"
+				android:gravity="center"
+				android:orientation="vertical"
+				android:layout_weight="0.9">
+
+				<LinearLayout
+					android:id="@+id/activitymainLinearLayoutBC"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:gravity="bottom|center"
+					android:orientation="horizontal">
+
+					<ImageView
+						android:id="@+id/activitymainImageViewTX"
+						android:layout_width="65dp"
+						android:layout_height="65dp"
+						android:src="@drawable/icon_round"/>
+
+				</LinearLayout>
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="10dp"
+					android:layout_marginBottom="15dp"
+					android:shadowColor="#FFFF0000"
+					android:shadowRadius="0.7"
+					android:text="荷花 Pro"
+					android:textColor="#FFFFFFFF"
+					android:textSize="15sp"
+					android:textStyle="bold"
+					android:typeface="monospace"/>
+
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="40dp"
+					android:layout_marginLeft="40dp"
+					android:layout_marginRight="40dp"
+					android:background="@drawable/kmground"
+					android:gravity="center"
+					android:orientation="horizontal">
+
+					<EditText
+						android:id="@+id/activitymainEditTextKM"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginLeft="18dp"
+						android:layout_weight="10"
+						android:background="#00000000"
+						android:cursorVisible="true"
+						android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*/"
+						android:hint="请输入卡密!"
+						android:lines="1"
+						android:singleLine="true"
+						android:textColor="#000000"
+						android:textColorHint="#D05E2C2C"
+						android:textSize="13sp"/>
+
+					<Button
+						android:id="@+id/activitymainButtonDL"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginLeft="5dp"
+						android:layout_marginRight="15dp"
+						android:background="#00000000"
+						android:shadowColor="#A67878"
+						android:shadowRadius="0.3"
+						android:text="登录"
+						android:textColor="#B5B2B2"
+						android:textSize="14sp"
+						android:typeface="sans"/>
+
+				</LinearLayout>
+
+			</LinearLayout>
+
+			<LinearLayout
+				android:id="@+id/Themebottom"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_weight="0.7"
+				android:orientation="vertical">
+
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_weight="0.1"
+					android:orientation="horizontal"/>
+
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="50dp"
+					android:gravity="center"
+					android:orientation="vertical">
+
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginBottom="3dp"
+						android:gravity="center"
+						android:orientation="horizontal">
+
+						<TextView
+							android:id="@+id/activitymainTextViewJB"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginRight="5dp"
+							android:gravity="center"
+							android:text="解绑卡密"
+							android:textColor="#FFFFFFFF"/>
+
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:gravity="center"
+							android:text="|"
+							android:textColor="#FFFFFFFF"/>
+
+						<TextView
+							android:id="@+id/activitymainTextViewXHJ"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginLeft="5dp"
+							android:layout_marginRight="5dp"
+							android:gravity="center"
+							android:text="Telegram"
+							android:textColor="#FFFFFFFF"/>
+
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:gravity="center"
+							android:text="|"
+							android:textColor="#FFFFFFFF"/>
+
+						<TextView
+							android:id="@+id/activitymainTextViewxCX"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginLeft="5dp"
+							android:gravity="center"
+							android:text="查询卡密"
+							android:textColor="#FFFFFFFF"/>
+
+					</LinearLayout>
+
+					<TextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:gravity="center"
+						android:text="You're a dream I'll never forget ."
+						android:textColor="#FF371212"
+						android:textSize="10sp"/>
+
+				</LinearLayout>
+
+			</LinearLayout>
+
+		</LinearLayout>
+
+	</FrameLayout>
+
+</LinearLayout>
+
