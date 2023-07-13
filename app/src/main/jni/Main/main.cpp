@@ -14,6 +14,16 @@ struct 全局配置{
 
 }配置;
 
+struct T3后台{
+    const char *url = (char *)"http://w.t3yanzheng.com/E5633A3CA5023084";
+    const char *unurl = (char *)"http://w.t3yanzheng.com/520AE8C6B453B9C0";
+    const char *base64 = (char *)"bCY/Pxg0VMUsXahjNIoi4LDzfAKRZTQ7S3dkWvOqwl9Jycnm1p5Ft6uBHr+2EeG8";
+    const char *key = (char *)"aa199d730b93da766143de1fe640bcb2";
+    const char *version = (char *)"aa199d730b93da766143de1fe640bcb2";
+    const char *tips = (char *)"aa199d730b93da766143de1fe640bcb2";
+
+}验证;
+
 bool 登录成功 = false;
 struct 绘制信息结构体{
     bool 初始化;
@@ -310,4 +320,69 @@ Java_com_empty_open_GLES3JNIView_real(JNIEnv* env,jclass obj,jfloat w, jfloat h)
     数值.屏幕Y = h;
 }
 
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_empty_open_MainActivity_LoadT3(JNIEnv *env, jobject thiz, jstring kami_s, jstring imei_s,jboolean isLogin) {
+    // TODO: implement LoadT3()
+    char *kami = (char *)malloc(512);
+    char *imei = (char *)malloc(512);
+    std::string k_s =  env->GetStringUTFChars(kami_s, JNI_FALSE);
+    std::string i_s =  env->GetStringUTFChars(imei_s, JNI_FALSE);
+    sprintf(kami,"%s",k_s.c_str());
+    sprintf(imei,"%s",i_s.c_str());
+    int code = 200;
 
+    T3_Json t3_Json{};
+    if (isLogin)
+    {
+        T3_LOAD(验证.url, 验证.base64, 验证.key, kami, imei, code, t3_Json);
+    }else
+    {
+        T3_LOAD(验证.unurl, 验证.base64, 验证.key, kami, imei, code, t3_Json);
+    }
+    char *tips = (char*) malloc(4096);
+    if (!t3_Json.isLogin)
+    {
+        sprintf(tips,"%s",t3_Json.msg.c_str());
+    }
+    else
+    {
+        sprintf(tips,"登录成功!\n到期时间:%s \n", t3_Json.end_time.c_str());
+    }
+    free(kami);
+    free(imei);
+    return env->NewStringUTF(tips);
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_empty_open_MainActivity_getTips(JNIEnv *env, jobject thiz) {
+    // TODO: implement getTips()
+    char *tips = (char*) malloc(4000);
+    T3_Json t3_Json{};
+    int code = 200;
+    T3_GG(验证.tips, code, t3_Json);
+    sprintf(tips,"%s",t3_Json.msg.c_str());
+    return env->NewStringUTF(tips);
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_empty_open_MainActivity_checkVersion(JNIEnv *env, jobject thiz) {
+    // TODO: implement checkVersion()
+    char *tips = (char*) malloc(4000);
+    int version = 1000;
+    int code = 200;
+    T3_Json t3_Json{};
+
+    T3_GX(验证.version, code, version, t3_Json);
+    if (t3_Json.isUpdate)
+    {
+        sprintf(tips, "%s", t3_Json.uplog.c_str());
+    }
+    else {
+        sprintf(tips,"%s",t3_Json.msg.c_str());
+    }
+
+    return env->NewStringUTF(tips);
+}

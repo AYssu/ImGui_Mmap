@@ -24,6 +24,24 @@ public class MainActivity extends AppCompatActivity {
         //导入静态库
     }
 
+    /**
+     * @param kami 传入T3卡密信息
+     * @param imei 传入T3 imei
+     * @param isLogin 判断是否为登录/解绑
+     * @return 返回登录信息的结果
+     */
+    public native String LoadT3(String kami, String imei, boolean isLogin);
+
+    /**
+     * @return 返回软件公告
+     */
+    public native String getTips();
+
+    /**
+     * @return 返回更新版本的校验 如果是最新则不处理
+     */
+    public native String checkVersion();
+
     private static final String[] NEEDED_PERMISSIONS = new String[]{
             //定义权限数值
             Manifest.permission.WRITE_SETTINGS,
@@ -59,6 +77,9 @@ public class MainActivity extends AppCompatActivity {
         Functions.OutFiles(MainActivity.this, getFilesDir() + "/assets", "draw");
     }
 
+    /**
+     * 获取软件必要权限 悬浮窗 读取权限 以及写入二进制 给予Root权限
+     */
     private void 获取权限() //初始化软件
     {
         if (Settings.canDrawOverlays(getApplicationContext())) {
