@@ -219,7 +219,7 @@ void BeginDraw()
     style.GrabMinSize = 10.0f;
     // 窗体边框圆角
     style.WindowRounding = 10.0f;
-    if (ImGui::Begin("\tImGui Study\t", NULL, 0))
+    if (ImGui::Begin("\tImGui Study 内存映射模板\t", NULL, 0))
     {
         g_window = ImGui::GetCurrentWindow();
         ImGui::SetWindowPos({15, 250}, ImGuiCond_Once);
@@ -275,22 +275,6 @@ void BeginDraw()
                 ImGui::EndTabItem();
             }
 
-//            if (ImGui::BeginTabItem("\t功能\t"))
-//            {
-//                if (ImGui::Checkbox("除草", &功能.除草))
-//                {
-//                    命令执行("weed", true);
-//                    // 以下功能参考 命令执行(执行的命令,是否添加根目录);
-//                }
-//                ImGui::SameLine();
-//                ImGui::Checkbox("无后", &功能.无后);
-//                ImGui::SameLine();
-//                ImGui::Checkbox("加速", &功能.加速);
-//                ImGui::SameLine();
-//                ImGui::Checkbox("自瞄", &功能.自瞄);
-//
-//                ImGui::EndTabItem();
-//            }
             if (ImGui::BeginTabItem("\t设置\t"))
             {
 
