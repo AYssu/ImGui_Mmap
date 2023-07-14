@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -42,6 +43,10 @@ public class MainActivity extends AppCompatActivity {
      */
     public native String checkVersion();
 
+    /**
+     * 初始化软件根目录 供反射调用
+     */
+    public native void init(String dir);
     private static final String[] NEEDED_PERMISSIONS = new String[]{
             //定义权限数值
             Manifest.permission.WRITE_SETTINGS,
@@ -74,6 +79,8 @@ public class MainActivity extends AppCompatActivity {
 
         获取权限();
 
+        init(getFilesDir()+"/assets");
+        //传入assets目录
         Functions.OutFiles(MainActivity.this, getFilesDir() + "/assets", "draw");
     }
 
@@ -122,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Functions.shell(name);
         }
+        Log.d(Functions.TAG,"cmd -> "+name +" isRoot -> "+Functions.isRoot());
     }
 
     /**

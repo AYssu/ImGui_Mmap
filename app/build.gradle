@@ -49,22 +49,7 @@ android {
             jni.srcDirs = []
         }
     }
-    buildTypes {
-        release {
-            minifyEnabled true
-            //最小化混淆
-            zipAlignEnabled true
-            // 移除无用的resource文件
-            shrinkResources true
 
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-        debug {
-            minifyEnabled true
-
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
     //编译出错时继续
     lintOptions {
         abortOnError false

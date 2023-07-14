@@ -15,6 +15,10 @@
 #include <iomanip>
 #include <thread>
 
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
+#include <android/log.h>
+#include <string>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/resource.h>
@@ -56,8 +60,8 @@
 
 #include <android/log.h>
 
-#define TAG "lOG日志" // 这个是自定义的LOG的标识
-#define LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,TAG,__VA_ARGS__) // 定义LOGGED类型
+#define TAG "lOG日志"													   // 这个是自定义的LOG的标识
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__) // 定义LOGGED类型
 #define maxplayerCount 100
 #define maxvehicleCount 50
 #define maxitemsCount 400
@@ -67,7 +71,7 @@ struct Vector2A
 	float X;
 	float Y;
 
-	  Vector2A()
+	Vector2A()
 	{
 		this->X = 0;
 		this->Y = 0;
@@ -86,7 +90,7 @@ struct Vector3A
 	float Y;
 	float Z;
 
-	  Vector3A()
+	Vector3A()
 	{
 		this->X = 0;
 		this->Y = 0;
@@ -99,7 +103,6 @@ struct Vector3A
 		this->Y = y;
 		this->Z = z;
 	}
-
 };
 
 struct FMatrix
@@ -119,33 +122,36 @@ struct FTransform
 {
 	Quat Rotation;
 	Vector3A Translation;
-//	float chunk;
+	//	float chunk;
 	Vector3A Scale3D;
 };
 
-enum Mode {
+enum Mode
+{
 	InitMode = 1,
 	ESPMode = 2,
 	HackMode = 3,
 	StopMode = 4,
 };
 
-struct Request {
+struct Request
+{
 	int Mode;
 	int ScreenWidth;
 	int ScreenHeight;
 };
 
-
-struct ItemData {
-    char ItemName[50];
-    float x;
+struct ItemData
+{
+	char ItemName[50];
+	float x;
 	float y;
 	float w;
-    float Distance;
+	float Distance;
 };
 
-struct VehicleData {
+struct VehicleData
+{
 	char VehicleName[50];
 	float x;
 	float y;
@@ -153,8 +159,9 @@ struct VehicleData {
 	float Distance;
 };
 
-struct PlayerData {
-	char PlayerName[100]; 
+struct PlayerData
+{
+	char PlayerName[100];
 	float x;
 	float y;
 	float w;
@@ -185,13 +192,14 @@ struct PlayerData {
 	int bullet;
 };
 
-struct Response {
+struct Response
+{
 	bool Success;
 	int PlayerCount;
 	int VehicleCount;
 	int ItemsCount;
-    int See;
-    PlayerData Players[maxplayerCount];
+	int See;
+	PlayerData Players[maxplayerCount];
 	VehicleData Vehicles[maxvehicleCount];
 	ItemData Items[maxitemsCount];
 };

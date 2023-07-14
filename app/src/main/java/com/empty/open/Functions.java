@@ -17,7 +17,7 @@ import java.io.InputStream;
  * @author 阿夜
  */
 public class Functions {
-   public static String TAG = "日志";
+   public static String TAG = "lOG日志";
     public static WindowManager.LayoutParams getAttributes(boolean isWindow) {
         WindowManager.LayoutParams params = new WindowManager.LayoutParams();
         params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
