@@ -200,7 +200,6 @@ void ESP()
 }
 void BeginDraw()
 {
-
     ImGuiIO &io = ImGui::GetIO();
     // UI窗体背景色
     ImGuiStyle &style = ImGui::GetStyle();
@@ -276,22 +275,22 @@ void BeginDraw()
                 ImGui::EndTabItem();
             }
 
-            if (ImGui::BeginTabItem("\t功能\t"))
-            {
-                if (ImGui::Checkbox("除草", &功能.除草))
-                {
-                    命令执行("weed", true);
-                    // 以下功能参考 命令执行(执行的命令,是否添加根目录);
-                }
-                ImGui::SameLine();
-                ImGui::Checkbox("无后", &功能.无后);
-                ImGui::SameLine();
-                ImGui::Checkbox("加速", &功能.加速);
-                ImGui::SameLine();
-                ImGui::Checkbox("自瞄", &功能.自瞄);
-
-                ImGui::EndTabItem();
-            }
+//            if (ImGui::BeginTabItem("\t功能\t"))
+//            {
+//                if (ImGui::Checkbox("除草", &功能.除草))
+//                {
+//                    命令执行("weed", true);
+//                    // 以下功能参考 命令执行(执行的命令,是否添加根目录);
+//                }
+//                ImGui::SameLine();
+//                ImGui::Checkbox("无后", &功能.无后);
+//                ImGui::SameLine();
+//                ImGui::Checkbox("加速", &功能.加速);
+//                ImGui::SameLine();
+//                ImGui::Checkbox("自瞄", &功能.自瞄);
+//
+//                ImGui::EndTabItem();
+//            }
             if (ImGui::BeginTabItem("\t设置\t"))
             {
 
@@ -411,39 +410,6 @@ Java_com_empty_open_MainActivity_LoadT3(JNIEnv *env, jobject thiz, jstring kami_
     return env->NewStringUTF(tips);
 }
 
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_empty_open_MainActivity_getTips(JNIEnv *env, jobject thiz)
-{
-    // TODO: implement getTips()
-    char *tips = (char *)malloc(4000);
-    T3_Json t3_Json{};
-    int code = 200;
-    T3_GG(验证.tips, code, t3_Json);
-    sprintf(tips, "%s", t3_Json.msg.c_str());
-    return env->NewStringUTF(tips);
-}
-
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_empty_open_MainActivity_checkVersion(JNIEnv *env, jobject thiz)
-{
-    // TODO: implement checkVersion()
-    char *tips = (char *)malloc(4000);
-    int version = 1000;
-    int code = 200;
-    T3_Json t3_Json{};
-
-    T3_GX(验证.version, code, version, t3_Json);
-    if (t3_Json.isUpdate)
-    {
-        sprintf(tips, "%s", t3_Json.uplog.c_str());
-    }
-    else
-    {
-        sprintf(tips, "%s", t3_Json.msg.c_str());
-    }
-
-    return env->NewStringUTF(tips);
-}
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_empty_open_MainActivity_init(JNIEnv *env, jobject thiz, jstring dir)

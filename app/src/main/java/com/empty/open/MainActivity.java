@@ -25,27 +25,6 @@ public class MainActivity extends AppCompatActivity {
         //导入静态库
     }
 
-    /**
-     * @param kami 传入T3卡密信息
-     * @param imei 传入T3 imei
-     * @param isLogin 判断是否为登录/解绑
-     * @return 返回登录信息的结果
-     */
-    public native String LoadT3(String kami, String imei, boolean isLogin);
-
-    /**
-     * @return 返回软件公告
-     */
-    public native String getTips();
-
-    /**
-     * @return 返回更新版本的校验 如果是最新则不处理
-     */
-    public native String checkVersion();
-
-    /**
-     * 初始化软件根目录 供反射调用
-     */
     public native void init(String dir);
     private static final String[] NEEDED_PERMISSIONS = new String[]{
             //定义权限数值

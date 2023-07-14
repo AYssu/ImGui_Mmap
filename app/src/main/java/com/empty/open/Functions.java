@@ -39,7 +39,6 @@ public class Functions {
     }
     
     public static void shell(final String shell) {
-        Log.d("Alice-",shell);
         new Thread(new Runnable(){
                 @Override
                 public void run() {
