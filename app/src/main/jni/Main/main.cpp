@@ -143,7 +143,7 @@ Java_com_empty_open_GLES3JNIView_init(JNIEnv *env, jclass cls)
         sprintf(response->Players[0].PlayerName,"%s","阿夜1");
         response->Players[0].x = 300;
         response->Players[0].y = 400;
-        response->Players[0].w= 10;
+        response->Players[0].w= 100;
         response->Players[0].Distance = 78.2f;
         response->Players[0].TeamID = 2;
         response->Players[0].Health = 88;
@@ -218,24 +218,108 @@ void ESP()
 
             if (绘制.射线)
             {
-                ImGui::GetForegroundDrawList()->AddLine({数值.屏幕X / 2, 130}, {人物数据.人物X, 人物数据.人物Y - 人物数据.人物W},颜色.随机颜色[人物数据.阵营], 数值.射线宽);
+                if (人物数据.人机==0)
+                    ImGui::GetForegroundDrawList()->AddLine({数值.屏幕X / 2, 130}, {人物数据.人物X, 人物数据.人物Y - 人物数据.人物W},颜色.随机颜色[人物数据.阵营], 数值.射线宽);
+                else
+                    ImGui::GetForegroundDrawList()->AddLine({数值.屏幕X / 2, 130}, {人物数据.人物X, 人物数据.人物Y - 人物数据.人物W},ImColor(255,255,255), 数值.射线宽);
+
             }
 
             if (绘制.方框)
             {
-
+                ImGui::GetForegroundDrawList()->AddRect({人物数据.人物X - (人物数据.人物W / 2), 人物数据.人物Y - 人物数据.人物W},{人物数据.人物X + (人物数据.人物W / 2), 人物数据.人物Y + 人物数据.人物W},颜色.随机颜色[人物数据.阵营],3, 0, 数值.方框宽);
             }
             if (绘制.昵称)
             {
-                AddText(配置.字体指针, 24,ImVec2(人物数据.人物X, (人物数据.人物Y - 人物数据.人物W) - 46.5),ImColor(225, 255, 255),response->Players[i].PlayerName);
+                if (人物数据.人机==0)
+                    AddText(配置.字体指针, 24,ImVec2(人物数据.人物X, (人物数据.人物Y - 人物数据.人物W) - 46.5),ImColor(255, 255, 255),response->Players[i].PlayerName);
+                else
+                    AddText(配置.字体指针, 24,ImVec2(人物数据.人物X, (人物数据.人物Y - 人物数据.人物W) - 46.5),ImColor(255, 255, 255),"鸡哥");
+
+            }
+
+            if (绘制.距离)
+            {
+                sprintf(temp,"[%.0fm]",人物数据.距离);
+                AddText(配置.字体指针,25,ImVec2(人物数据.人物X, (人物数据.人物Y + 人物数据.人物W) + 15),ImColor(255,255,255),temp);
+
             }
 
             if (绘制.阵营)
             {
                 sprintf(temp,"%d",response->Players[i].TeamID);
-                AddText(配置.字体指针,28,ImVec2(人物数据.人物X - 110, (人物数据.人物Y-人物数据.人物W) - 46.5),ImColor(225,255,255),temp);
+                AddText(配置.字体指针,23,ImVec2(人物数据.人物X - 110, (人物数据.人物Y-人物数据.人物W) - 46.5),ImColor(255,255,255),temp);
             }
 
+            if (绘制.背敌)
+            {
+
+                sprintf(temp,"%.0m",人物数据.距离);
+                if (人物数据.人物X + (人物数据.人物W / 2) < 0) // 左侧背敌
+                {
+
+                    ImGui::GetForegroundDrawList()->AddCircle({0,人物数据.人物Y}, 62, ImColor(255,255,255,255), 0,2);
+
+                    if (人物数据.人机 == 0)
+                    {
+                        ImGui::GetForegroundDrawList()->AddCircleFilled({0,人物数据.人物Y}, 60, 颜色.浅色透明度, 90);
+                    }
+                    else
+                    {
+                        ImGui::GetForegroundDrawList()->AddCircleFilled({0,人物数据.人物Y}, 60, ImColor(255,255,255,100), 90);
+                    }
+                    AddText(配置.字体指针, 30, ImVec2(30, 人物数据.人物Y), ImColor(255, 255, 255), temp);
+                }
+
+                else if (人物数据.人物X - (人物数据.人物W / 2) > 数值.屏幕X) // 右侧背敌
+                {
+
+                    ImGui::GetForegroundDrawList()->AddCircle({数值.屏幕X,人物数据.人物Y}, 62, ImColor(255,255,255,255), 0,2);
+
+                    if (人物数据.人机 == 0)
+                    {
+                        ImGui::GetForegroundDrawList()->AddCircleFilled({数值.屏幕X,人物数据.人物Y}, 60, 颜色.浅色透明度, 90);
+                    }
+                    else
+                    {
+                        ImGui::GetForegroundDrawList()->AddCircleFilled({数值.屏幕X,人物数据.人物Y}, 60, ImColor(255,255,255,100), 90);
+                    }
+                    AddText(配置.字体指针, 30, ImVec2(数值.屏幕X - 30, 人物数据.人物Y), ImColor(255, 255, 255), temp);
+                }
+                else if (人物数据.人物Y + 人物数据.人物W < 0)
+                {
+
+                    ImGui::GetForegroundDrawList()->AddCircle({人物数据.人物X,0}, 62, ImColor(255,255,255,255), 0,2);
+
+                    if (人物数据.人机 == 0)
+                    {
+                        ImGui::GetForegroundDrawList()->AddCircleFilled({人物数据.人物X,0}, 60, 颜色.浅色透明度, 90);
+                    }
+                    else
+                    {
+                        ImGui::GetForegroundDrawList()->AddCircleFilled({人物数据.人物X,0}, 60, ImColor(255,255,255,100), 90);
+                    }
+
+                    AddText(配置.字体指针, 30, ImVec2(人物数据.人物X, 30), ImColor(255, 255, 255), temp);
+                }
+            }
+        }
+        else {
+            if (绘制.背敌&&绘制.初始化) {
+
+                ImGui::GetForegroundDrawList()->AddCircle({人物数据.人物X,数值.屏幕Y}, 62, ImColor(255,255,255,255), 0,2);
+
+                if (人物数据.人机 == 0)
+                {
+                    ImGui::GetForegroundDrawList()->AddCircleFilled({人物数据.人物X,数值.屏幕Y}, 60, 颜色.浅色透明度, 90);
+                }
+                else
+                {
+                    ImGui::GetForegroundDrawList()->AddCircleFilled({人物数据.人物X,数值.屏幕Y}, 60, ImColor(255,255,255,100), 90);
+                }
+                sprintf(temp,"%.0m",人物数据.距离);
+                AddText(配置.字体指针, 30, ImVec2(人物数据.人物X, 数值.屏幕Y - 30), ImColor(255, 255, 255), temp);
+            }
         }
     }
     // 绘制帧率
@@ -262,6 +346,7 @@ void ESP()
             AddText(配置.字体指针, 40, ImVec2(数值.屏幕X / 2 + 100, 85), ImColor(255, 255, 255), temp);
         }
     }
+
 }
 void BeginDraw()
 {
