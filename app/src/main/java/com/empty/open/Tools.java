@@ -6,17 +6,22 @@ import android.os.Build;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.WindowManager;
+
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 
 /**
  * @author 阿夜
  */
-public class Functions {
+public class Tools {
    public static String TAG = "lOG日志";
     public static WindowManager.LayoutParams getAttributes(boolean isWindow) {
         WindowManager.LayoutParams params = new WindowManager.LayoutParams();
@@ -37,6 +42,40 @@ public class Functions {
         params.width = params.height = isWindow ? WindowManager.LayoutParams.MATCH_PARENT : 0;
         return params;
     }
+
+    public static boolean 文件写入(String 文件路径, String 文件内容) {
+        try {
+            FileWriter utf = new FileWriter(文件路径); //写入文件
+            utf.write(文件内容);
+            utf.close();
+            return true;
+        } catch (IOException e) {
+            Log.d(TAG,"目标位置 -> " + 文件路径 + "内容 -> " + 文件内容 + "分析日志 ->" + e);
+            return false;
+        }
+    }
+    public static String 文件读取(String 文件路径)
+    {
+        String 返回文件 = "";
+        try {
+            File file = new File(文件路径);
+            FileInputStream fis = new FileInputStream(file);
+            InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+            BufferedReader br = new BufferedReader(isr);
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                返回文件 = 返回文件  + line+"\n";
+            }
+            返回文件 = 返回文件.substring(0,返回文件.length()-1);
+            br.close();
+            return 返回文件;
+        }catch (Exception e)
+        {
+            Log.d(TAG,"分析日志 ->" + e);
+        }
+        return "";
+    }
     
     public static void shell(final String shell) {
         new Thread(new Runnable(){
@@ -54,7 +93,6 @@ public class Functions {
                     }
                 }
             }).start();
-
     }
     
     public static boolean OutFiles(Context context, String outPath, String fileName) {

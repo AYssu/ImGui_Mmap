@@ -15,17 +15,19 @@ struct 全局配置
     ImFont *字体指针;
     JNIEnv *Jvm_env = NULL;
     ImGuiIO io;
+    std::string 提示内容 = "加载中...";
+    bool 是否更新 = false;
 
 } 配置;
 
 struct T3后台
 {
-    const char *url = (char *)"http://w.t3yanzheng.com/E5633A3CA5023084";
-    const char *unurl = (char *)"http://w.t3yanzheng.com/520AE8C6B453B9C0";
-    const char *base64 = (char *)"bCY/Pxg0VMUsXahjNIoi4LDzfAKRZTQ7S3dkWvOqwl9Jycnm1p5Ft6uBHr+2EeG8";
-    const char *key = (char *)"aa199d730b93da766143de1fe640bcb2";
-    const char *version = (char *)"aa199d730b93da766143de1fe640bcb2";
-    const char *tips = (char *)"aa199d730b93da766143de1fe640bcb2";
+    const char *base = (const char *) "LYR+MlEUPkqQ97aJ0BuDXKyGpHsjrvfbCnwthVO5iTFZIxego4Szm/26WN1A8d3c";
+    const char *Login = (const char *) "http://w.t3yanzheng.com/02B54F9E1FDBA628";
+    const char *UnLogin = (const char *) "http://w.t3yanzheng.com/BD3597FD28179B30";
+    const char *key = (const char *) "80f939e0121b3963e3913f92552f2fc1";
+    const char *GXurl = (const char *) "http://w.t3yanzheng.com/2B93B2B2F4A8603A";
+    const char *GGurl = (const char *) "http://w.t3yanzheng.com/45BEAA3106313B04";
 
 } 验证;
 
@@ -45,6 +47,7 @@ struct 绘制信息结构体
     bool 人数;
     bool 背景;
     bool 背敌;
+    bool 物资;
 
 } 绘制;
 
@@ -98,7 +101,13 @@ struct 绘制
     float 左脚腕X, 左脚腕Y; // 左脚腕
     float 右脚腕X, 右脚腕Y; // 右脚腕
 } 人物数据;
-
+struct 物资结构{
+    int id;
+    float 物资X;
+    float 物资Y;
+    float 物资W;
+    float 物资距离;
+}物资绘制;
 void 命令执行(char *shell, bool onlyDIR)
 {
     char *cmd = (char *)malloc(4096);
@@ -115,6 +124,13 @@ void 命令执行(char *shell, bool onlyDIR)
     free(cmd);
 }
 
+std::string getCurrentDateTime() {
+    time_t now = time(0); // 获取当前时间
+    tm *ltm = localtime(&now); // 转换为本地时间
+    std::ostringstream oss;
+    oss << std::put_time(ltm, "%Y-%m-%d %H:%M:%S"); // 将时间格式化为字符串
+    return oss.str();
+}
 extern "C" JNIEXPORT void JNICALL
 Java_com_empty_open_GLES3JNIView_init(JNIEnv *env, jclass cls)
 {
@@ -137,7 +153,7 @@ Java_com_empty_open_GLES3JNIView_init(JNIEnv *env, jclass cls)
     // 文件名 只读 结构体大小 只能使用指针结构体
     memset(response,0, sizeof(Response));
     //清空结构体
-    if (true)
+    if (false)
     {
         response->PlayerCount=1;
         sprintf(response->Players[0].PlayerName,"%s","阿夜1");
@@ -148,7 +164,6 @@ Java_com_empty_open_GLES3JNIView_init(JNIEnv *env, jclass cls)
         response->Players[0].TeamID = 2;
         response->Players[0].Health = 88;
         response->Players[0].isBot = 0;
-
     }
     //  设置ImGui风格
     ImGui::StyleColorsLight();
@@ -203,6 +218,9 @@ void ESP()
         颜色.浅色透明度 = ImColor(ImVec4(颜色.随机颜色[人物数据.阵营].Value.x, 颜色.随机颜色[人物数据.阵营].Value.y, 颜色.随机颜色[人物数据.阵营].Value.z,0.8f));
         //获取随机颜色 换透明度
 
+        人物数据.人物X = 人物数据.人物X + (人物数据.人物W / 2); // 屏幕矫正半个身位
+        人物数据.人机==1?人机++:真人++;
+
         if (人物数据.人物W>0)
         {
 
@@ -254,7 +272,7 @@ void ESP()
             if (绘制.背敌)
             {
 
-                sprintf(temp,"%.0m",人物数据.距离);
+                sprintf(temp,"%.0fm",人物数据.距离);
                 if (人物数据.人物X + (人物数据.人物W / 2) < 0) // 左侧背敌
                 {
 
@@ -317,8 +335,26 @@ void ESP()
                 {
                     ImGui::GetForegroundDrawList()->AddCircleFilled({人物数据.人物X,数值.屏幕Y}, 60, ImColor(255,255,255,100), 90);
                 }
-                sprintf(temp,"%.0m",人物数据.距离);
+                sprintf(temp,"%.0fm",人物数据.距离);
                 AddText(配置.字体指针, 30, ImVec2(人物数据.人物X, 数值.屏幕Y - 30), ImColor(255, 255, 255), temp);
+            }
+        }
+    }
+
+    if (绘制.物资)
+    {
+        for(int i = 0;i<response->ItemsCount;i++)
+        {
+            物资绘制.物资X = response->Items[i].x;
+            物资绘制.物资Y = response->Items[i].y;
+            物资绘制.物资W = response->Items[i].w;
+            物资绘制.物资X = 物资绘制.物资X + (物资绘制.物资W / 2); // 屏幕矫正半个身位
+            物资绘制.物资距离 = response->Items[i].Distance;
+            if (物资绘制.物资W > 0)
+            {
+
+                AddText(配置.字体指针, 27, ImVec2(物资绘制.物资X, 物资绘制.物资Y),ImColor(255,255,255), response->Items[i].ItemName);
+
             }
         }
     }
@@ -370,6 +406,7 @@ void BeginDraw()
     style.GrabMinSize = 10.0f;
     // 窗体边框圆角
     style.WindowRounding = 10.0f;
+
     if (ImGui::Begin(配置.悬浮窗标题.c_str(), NULL, 0))
     {
         g_window = ImGui::GetCurrentWindow();
@@ -394,7 +431,7 @@ void BeginDraw()
                 ImGui::SameLine(0,30);
                 if(ImGui::Button("功能全开"))
                 {
-                    绘制.血量=绘制.阵营=绘制.人数=绘制.帧率=绘制.昵称=绘制.背景=绘制.距离=绘制.射线=绘制.方框=绘制.背敌 = true;
+                    绘制.物资=绘制.血量=绘制.阵营=绘制.人数=绘制.帧率=绘制.昵称=绘制.背景=绘制.距离=绘制.射线=绘制.方框=绘制.背敌 = true;
                 }
                 ImGui::Checkbox("方框", &绘制.方框);
                 ImGui::SameLine();
@@ -415,6 +452,9 @@ void BeginDraw()
                 ImGui::Checkbox("背景", &绘制.背景);
                 ImGui::SameLine();
                 ImGui::Checkbox("背敌", &绘制.背敌);
+                ImGui::SameLine();
+                ImGui::Checkbox("物资", &绘制.物资);
+
                 ImGui::ColorEdit4("方框颜色", (float *)&颜色.方框颜色);
                 ImGui::ColorEdit4("射线颜色", (float *)&颜色.真人射线颜色);
                 ImGui::ColorEdit4("骨骼颜色", (float *)&颜色.骨骼颜色);
@@ -471,14 +511,30 @@ Java_com_empty_open_GLES3JNIView_step(JNIEnv *env, jclass obj)
     ImGui_ImplAndroid_NewFrame(数值.屏幕X, 数值.屏幕Y);
     ImGui::NewFrame();
 
-    BeginDraw();
-
-    if (g_Initialized&&绘制.初始化)
+    //先判断是否登录成功 不成功就弹公告咯 有更新就弹更新 反正写在C里面比Java层安全 至于高级点就加密吧
+    if (登录成功)
     {
-        ESP();
-    }
+        BeginDraw();
 
-    EndDraw();
+        if (g_Initialized&&绘制.初始化)
+        {
+            ESP();
+        }
+
+        EndDraw();
+    }else
+    {
+        if (ImGui::Begin("软件启动页", NULL, ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoTitleBar))
+        {
+            g_window = ImGui::GetCurrentWindow();
+            ImGui::SetWindowPos({15, 250}, ImGuiCond_Once);
+            ImGui::SetWindowSize({数值.屏幕X - 30, -1}, ImGuiCond_Once);
+            ImGui::Text("提示内容:\n%s\n\n--时间: %s",配置.提示内容.c_str(),getCurrentDateTime().c_str());
+        }
+        ImGuiWindow *window = ImGui::GetCurrentWindow();
+        window->DrawList->PushClipRectFullScreen();
+        ImGui::End();
+    }
 
     ImGui::Render();
     glClear(GL_COLOR_BUFFER_BIT);
@@ -526,27 +582,38 @@ Java_com_empty_open_MainActivity_LoadT3(JNIEnv *env, jobject thiz, jstring kami_
     T3_Json t3_Json{};
     if (isLogin)
     {
-        T3_LogIn(验证.url, 验证.base64, 验证.key, kami, imei, code, t3_Json);
+        T3_LogIn(验证.Login, 验证.base, 验证.key, kami, imei, code, t3_Json);
     }
     else
     {
-        T3_LogIn(验证.unurl, 验证.base64, 验证.key, kami, imei, code, t3_Json);
+        T3_LogIn(验证.UnLogin, 验证.base, 验证.key, kami, imei, code, t3_Json);
     }
     char *tips = (char *)malloc(4096);
     if (!t3_Json.isLogin)
     {
-        sprintf(tips, "%s", t3_Json.msg.c_str());
+        配置.提示内容 =  t3_Json.msg.c_str();
     }
     else
     {
-        sprintf(tips, "登录成功!\n到期时间:%s \n", t3_Json.end_time.c_str());
+        登录成功 = true;
+        sprintf(tips, "到期时间:%s \n", t3_Json.end_time.c_str());
     }
     free(kami);
     free(imei);
+    LOGD("%s",tips);
     return env->NewStringUTF(tips);
 }
 
-
+//使用多线程获取软件公告或者更新
+void notes_updata()
+{
+    //先进行更新
+    //然后是公告 这里就不写了 相信你们能搞定 Sea.hpp 里面有 不会就看GitHub上面写了咋用
+    //算了 觉得小白不会就写了一个公告
+    T3_Json t3Json = {};
+    T3_Notice(验证.GGurl,200,t3Json);
+    配置.提示内容 = t3Json.msg;
+}
 extern "C" JNIEXPORT void JNICALL
 Java_com_empty_open_MainActivity_init(JNIEnv *env, jobject thiz, jstring dir)
 {
@@ -559,5 +626,7 @@ Java_com_empty_open_MainActivity_init(JNIEnv *env, jobject thiz, jstring dir)
         配置.悬浮窗标题 = "ImGui Study 内存映射模板[框架]";
     }
     配置.软件根目录库 = env->GetStringUTFChars(dir, JNI_FALSE);
+    std::thread get_app_notice_updata(notes_updata);
+    get_app_notice_updata.detach();
     LOGD("加载软件根目录: %s", 配置.软件根目录库.c_str());
 }

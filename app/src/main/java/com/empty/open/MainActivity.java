@@ -1,21 +1,32 @@
 package com.empty.open;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 /**
  * 该项目已在github开源 有兴趣的小伙伴欢迎给个 start
  * 2022.09.27
- * AIDE全解 带注释给小白学习用
+ * 2023-11-12 进行二次开发完善 一直没时间
+ * AIDE全解 带注释给小白学习用 学不会就算了
  *
  * @author 阿夜*/
 public class MainActivity extends AppCompatActivity {
@@ -26,6 +37,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public native void init(String dir);
+    public native String LoadT3(String kami,String imei,boolean is_login);
+    public Button 登录控件;
+    public TextView 解绑控件;
+    public EditText 卡密框;
     private static final String[] NEEDED_PERMISSIONS = new String[]{
             //定义权限数值
             Manifest.permission.WRITE_SETTINGS,
@@ -60,8 +75,79 @@ public class MainActivity extends AppCompatActivity {
 
         init(getFilesDir()+"/assets");
         //传入assets目录
-        Functions.OutFiles(MainActivity.this, getFilesDir() + "/assets", "draw");
+        Tools.OutFiles(MainActivity.this, getFilesDir() + "/assets", "draw");
+
+        设置点击监听();
     }
+
+    /**
+     * 获取点击事件 主要是验证卡密
+     */
+    private void 设置点击监听()
+    {
+        登录控件 = findViewById(R.id.activitymainButtonDL);
+        解绑控件 = findViewById(R.id.activitymainTextViewJB);
+        卡密框 = findViewById(R.id.activitymainEditTextKM);
+
+        登录控件.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                final ProgressDialog progressDialog = new ProgressDialog(MainActivity.this, 5);
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                progressDialog.setMessage("Please wait...");
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+
+                @SuppressLint("HandlerLeak") final Handler loginHandler = new Handler() {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        if (msg.what == 0) {
+                            progressDialog.dismiss();
+
+                        } else if (msg.what == 1) {
+                            progressDialog.dismiss();
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                            builder.setTitle("登录成功");
+                            builder.setMessage(msg.obj.toString());
+                            builder.setCancelable(false);
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Tools.文件写入("/sdcard/卡密信息", 卡密框.getText().toString());
+                                }
+                            });
+                            builder.show();
+                        }
+
+                    }
+                };
+
+                new Thread(() -> {
+                    String result = LoadT3(卡密框.getText().toString(),android.provider.Settings.Secure.getString(MainActivity.this.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID),true);
+                    Log.d(Tools.TAG,result);
+                    if (!result.contains("到期时间")) {
+                        loginHandler.sendEmptyMessage(0);
+                    } else {
+                        Message msg = new Message();
+                        msg.what = 1;
+                        msg.obj = result;
+                        loginHandler.sendMessage(msg);
+                    }
+                }).start();
+            }
+        });
+        解绑控件.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                LoadT3(卡密框.getText().toString(),android.provider.Settings.Secure.getString(MainActivity.this.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID),false);
+            }
+        });
+
+        //其他什么加TG QQ群的自己copy copy吧
+    }
+
 
     /**
      * 获取软件必要权限 悬浮窗 读取权限 以及写入二进制 给予Root权限
@@ -71,15 +157,15 @@ public class MainActivity extends AppCompatActivity {
         if (Settings.canDrawOverlays(getApplicationContext())) {
             //判断悬浮窗权限
 
-            if (Functions.isRoot()) {
+            if (Tools.isRoot()) {
                 //判断设备环境
                 Toast.makeText(MainActivity.this, "Root", Toast.LENGTH_SHORT).show();
-                Functions.shell("su -c chmod -R 7777 " + getFilesDir() + "/assets");
+                Tools.shell("su -c chmod -R 7777 " + getFilesDir() + "/assets");
 
             } else {
 
                 Toast.makeText(MainActivity.this, "框架", Toast.LENGTH_SHORT).show();
-                Functions.shell("chmod -R 7777 " + getFilesDir() + "/assets");
+                Tools.shell("chmod -R 7777 " + getFilesDir() + "/assets");
 
             }
             startService(new Intent(MainActivity.this, MyService.class));
@@ -103,12 +189,12 @@ public class MainActivity extends AppCompatActivity {
      */
     public void call(String name) {
         //jni反射调用，传递二进制路径
-        if (Functions.isRoot()) {
-            Functions.shell("su -c " + name);
+        if (Tools.isRoot()) {
+            Tools.shell("su -c " + name);
         } else {
-            Functions.shell(name);
+            Tools.shell(name);
         }
-        Log.d(Functions.TAG,"cmd -> "+name +" isRoot -> "+Functions.isRoot());
+        Log.d(Tools.TAG,"cmd -> "+name +" isRoot -> "+Tools.isRoot());
     }
 
     /**
@@ -118,4 +204,12 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        if (!Settings.canDrawOverlays(getApplicationContext()))
+        {
+            Toast.makeText(MainActivity.this,"授予悬浮窗权限失败!请手动打开悬浮窗 并重启软件",Toast.LENGTH_SHORT).show();
+        }
+    }
 }

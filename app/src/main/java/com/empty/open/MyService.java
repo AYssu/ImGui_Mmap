@@ -1,10 +1,6 @@
 package com.empty.open;
 
 import android.annotation.SuppressLint;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -12,7 +8,6 @@ import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -42,7 +37,7 @@ public class MyService extends Service {
         //获取系统窗口
         WindowManager.LayoutParams params = new WindowManager.LayoutParams();
 
-        vParams = Functions.getAttributes(false);
+        vParams = Tools.getAttributes(false);
         vParams.x = vParams.y = 0;
         display = new GLES3JNIView(this);
         //引入GLSurfaceView
@@ -59,7 +54,6 @@ public class MyService extends Service {
                     case MotionEvent.ACTION_UP:
                         GLES3JNIView.MotionEventClick(action != MotionEvent.ACTION_UP, event.getRawX(), event.getRawY());
                         String date = String.valueOf(action != MotionEvent.ACTION_UP);
-                        Log.d("Alice-", date + "X" + event.getRawX() + "Y" + event.getRawY());
                         break;
                     default:
                         break;
@@ -83,7 +77,6 @@ public class MyService extends Service {
                 handler.postDelayed(this, 20);
             }
         }, 20);
-        ////////*
         params.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
                 View.SYSTEM_UI_FLAG_FULLSCREEN |
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |

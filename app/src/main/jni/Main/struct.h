@@ -174,6 +174,7 @@ struct Response
 {
     bool Success;
     int PlayerCount;
+    int ItemsCount;
     PlayerData Players[maxplayerCount];
     ItemData Items[maxitemsCount];
 };
