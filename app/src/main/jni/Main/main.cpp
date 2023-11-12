@@ -1,17 +1,20 @@
 #include "struct.h"
 #include "ImGui/font.h"
-#include "Static/Sea.h"
+#include "SeaTool/Sea.hpp"
 
 bool g_Initialized;
 Response *response;
 // 绘制结构体
 ImGuiWindow *g_window = nullptr;
-
+char temp[888];
+//静态缓存char
 struct 全局配置
 {
+    std::string 悬浮窗标题 = "阿夜";
     std::string 软件根目录库;
     ImFont *字体指针;
     JNIEnv *Jvm_env = NULL;
+    ImGuiIO io;
 
 } 配置;
 
@@ -27,6 +30,7 @@ struct T3后台
 } 验证;
 
 bool 登录成功 = false;
+
 struct 绘制信息结构体
 {
     bool 初始化;
@@ -36,15 +40,12 @@ struct 绘制信息结构体
     bool 昵称;
     bool 距离;
     bool 血量;
-    bool 雷达;
-    bool 观战;
-    bool 骨骼;
     bool 帧率;
     bool 阵营;
     bool 人数;
+    bool 背景;
+    bool 背敌;
 
-    bool 自瞄圈;
-    bool 雷达圈;
 } 绘制;
 
 struct 颜色结构体
@@ -53,6 +54,7 @@ struct 颜色结构体
     ImColor 真人射线颜色 = ImColor(0, 255, 255, 255);
     ImColor 骨骼颜色 = ImColor(200, 255, 0, 255);
     ImColor 随机颜色[1000] = {};
+    ImColor 浅色透明度 = {};
 } 颜色;
 struct 功能结构体
 {
@@ -113,25 +115,6 @@ void 命令执行(char *shell, bool onlyDIR)
     free(cmd);
 }
 
-std::string getAssetFilesPath(JNIEnv *env, jobject assetManagerJavaObject)
-{
-    std::string assetFilesPath;
-    AAssetManager *assetManager = AAssetManager_fromJava(env, assetManagerJavaObject);
-
-    AAssetDir *assetDir = AAssetManager_openDir(assetManager, "");
-    const char *filename = nullptr;
-
-    while ((filename = AAssetDir_getNextFileName(assetDir)) != nullptr)
-    {
-        std::string filePath = filename;
-        assetFilesPath += filePath + "\n";
-    }
-
-    AAssetDir_close(assetDir);
-
-    return assetFilesPath;
-}
-
 extern "C" JNIEXPORT void JNICALL
 Java_com_empty_open_GLES3JNIView_init(JNIEnv *env, jclass cls)
 {
@@ -140,24 +123,39 @@ Java_com_empty_open_GLES3JNIView_init(JNIEnv *env, jclass cls)
         return;
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
+    配置.io = ImGui::GetIO();
     配置.Jvm_env = env;
-    io.IniFilename = nullptr;
+    配置.io.IniFilename = nullptr;
 
-    for (int i = 0; i < 1000; ++i)
+    for (auto & i : 颜色.随机颜色)
     {
-        颜色.随机颜色[i] = ImColor(ImVec4((rand() % 205 + 50) / 255.f, rand() % 255 / 255.f, rand() % 225 / 225.f, 225 / 225.f));
+        i = ImColor(ImVec4((rand() % 205 + 50) / 255.f, rand() % 255 / 255.f, rand() % 225 / 225.f, 225 / 225.f));
     }
     // 随机队伍颜色
 
     response = (Response *)build_mmap("/sdcard/Empty", false, sizeof(Response));
     // 文件名 只读 结构体大小 只能使用指针结构体
+    memset(response,0, sizeof(Response));
+    //清空结构体
+    if (true)
+    {
+        response->PlayerCount=1;
+        sprintf(response->Players[0].PlayerName,"%s","阿夜1");
+        response->Players[0].x = 300;
+        response->Players[0].y = 400;
+        response->Players[0].w= 10;
+        response->Players[0].Distance = 78.2f;
+        response->Players[0].TeamID = 2;
+        response->Players[0].Health = 88;
+        response->Players[0].isBot = 0;
+
+    }
     //  设置ImGui风格
     ImGui::StyleColorsLight();
 
     ImGui_ImplAndroid_Init();
     ImGui_ImplOpenGL3_Init("#version 300 es");
-    配置.字体指针 = io.Fonts->AddFontFromMemoryTTF((void *)FontFile, Fontsize, 30.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
+    配置.字体指针 =  配置.io.Fonts->AddFontFromMemoryTTF((void *)FontFile, Fontsize, 30.0f, NULL, 配置.io.Fonts->GetGlyphRangesChineseFull());
     IM_ASSERT(配置.字体指针 != NULL);
 
     ImGui::GetStyle().ScaleAllSizes(3.0f);
@@ -177,34 +175,102 @@ Java_com_empty_open_GLES3JNIView_resize(JNIEnv *env, jclass obj, jint width, jin
     数值.屏幕X = (float)width;
     数值.屏幕Y = (float)height;
     glViewport(30, 400, width, height);
-    ImGuiIO &io = ImGui::GetIO();
-    io.ConfigWindowsMoveFromTitleBarOnly = true;
-    io.IniFilename = nullptr;
     ImGui::GetIO().DisplaySize = ImVec2((float)width, (float)height);
 }
 
-void DrawText(float X, float Y, int sizem, char *data)
+
+void AddText(ImFont *font, float font_size, ImVec2 pos, ImColor col, char *text_begin)
 {
-    auto size = ImGui::CalcTextSize(data);
-    float x = size.x * (sizem / 39.0f);
-    float y = size.y * (sizem / 39.0f);
-    ImGui::GetBackgroundDrawList()->AddText(配置.字体指针, sizem, ImVec2(X -= (float)((int)x >> 1), Y -= (float)((int)y >> 1)), ImColor(225, 255, 255), data);
+    auto size = ImGui::CalcTextSize(text_begin);
+    float x = size.x * (font_size / font->FontSize);
+    float y = size.y * (font_size / font->FontSize);
+    ImGui::GetForegroundDrawList()->AddText(font, font_size, ImVec2(pos.x -= ((int)x >> 1), pos.y -= ((int)y >> 1)), col, text_begin);
 }
 
 void ESP()
 {
-    int zr = 0, rj = 0;
-    for (int i = 0; i < response->PlayerCount; ++i)
+    int 真人 = 0, 人机 = 0;
+
+    for (int i = 0; i < response->PlayerCount; i++)
     {
+        人物数据.人物X = response->Players[i].x;
+        人物数据.人物Y = response->Players[i].y;
+        人物数据.人物W = response->Players[i].w;
+        人物数据.血量 = response->Players[i].Health;
+        人物数据.人机 = response->Players[i].isBot;
+        人物数据.阵营 = 人物数据.人机 > 0 ? 0 : response->Players[i].TeamID;
+        人物数据.距离 = response->Players[i].Distance;
+        颜色.浅色透明度 = ImColor(ImVec4(颜色.随机颜色[人物数据.阵营].Value.x, 颜色.随机颜色[人物数据.阵营].Value.y, 颜色.随机颜色[人物数据.阵营].Value.z,0.8f));
+        //获取随机颜色 换透明度
+
+        if (人物数据.人物W>0)
+        {
+
+            if (绘制.背景)
+            {
+                ImGui::GetForegroundDrawList()->AddRectFilled({人物数据.人物X - 130, (人物数据.人物Y - 人物数据.人物W) - 66}, { 人物数据.人物X- 90, (人物数据.人物Y - 人物数据.人物W) - 27},颜色.浅色透明度,10,0);
+                ImGui::GetForegroundDrawList()->AddRectFilled({人物数据.人物X - 130, (人物数据.人物Y - 人物数据.人物W) - 66}, {人物数据.人物X + 130, (人物数据.人物Y - 人物数据.人物W) - 27},颜色.浅色透明度,8,0);
+            }
+            if (绘制.血量)
+            {
+                ImGui::GetForegroundDrawList()->AddLine({人物数据.人物X - 90, ( 人物数据.人物Y- 人物数据.人物W) - 30},{(人物数据.人物X - 130) + (2.6 * 人物数据.血量),(人物数据.人物Y - 人物数据.人物W) - 30},ImColor(225, 255, 225), 3);
+            }
+
+            if (绘制.射线)
+            {
+                ImGui::GetForegroundDrawList()->AddLine({数值.屏幕X / 2, 130}, {人物数据.人物X, 人物数据.人物Y - 人物数据.人物W},颜色.随机颜色[人物数据.阵营], 数值.射线宽);
+            }
+
+            if (绘制.方框)
+            {
+
+            }
+            if (绘制.昵称)
+            {
+                AddText(配置.字体指针, 24,ImVec2(人物数据.人物X, (人物数据.人物Y - 人物数据.人物W) - 46.5),ImColor(225, 255, 255),response->Players[i].PlayerName);
+            }
+
+            if (绘制.阵营)
+            {
+                sprintf(temp,"%d",response->Players[i].TeamID);
+                AddText(配置.字体指针,28,ImVec2(人物数据.人物X - 110, (人物数据.人物Y-人物数据.人物W) - 46.5),ImColor(225,255,255),temp);
+            }
+
+        }
+    }
+    // 绘制帧率
+    if (绘制.帧率)
+    {
+        AddText(配置.字体指针, 30, ImVec2(100, 110), ImColor(255, 0, 0, 120), "阿夜映射插件");
+        sprintf(temp, "FPS：%.2f",  配置.io.Framerate);
+        AddText(配置.字体指针, 30, ImVec2(100, 150), ImColor(0, 255, 0), temp);
+    }
+    // 绘制人数 队伍
+    if (绘制.人数)
+    {
+        if (response->PlayerCount == 0)
+        {
+            AddText(配置.字体指针, 35, ImVec2(数值.屏幕X / 2, 数值.屏幕Y / 15), ImColor(0, 255, 0, 250), "安 全");
+        }
+        else
+        {
+            sprintf(temp, "真人:%d", 真人);
+
+            AddText(配置.字体指针, 40, ImVec2(数值.屏幕X / 2 - 100, 85), ImColor(255, 0, 0, 255), temp);
+
+            sprintf(temp, "人机:%d", 人机);
+            AddText(配置.字体指针, 40, ImVec2(数值.屏幕X / 2 + 100, 85), ImColor(255, 255, 255), temp);
+        }
     }
 }
 void BeginDraw()
 {
-    ImGuiIO &io = ImGui::GetIO();
+    配置.io = ImGui::GetIO();
     // UI窗体背景色
     ImGuiStyle &style = ImGui::GetStyle();
-    io.ConfigWindowsMoveFromTitleBarOnly = false;
-    io.WantSaveIniSettings = true;
+    配置.io.ConfigWindowsMoveFromTitleBarOnly = false;
+    配置.io.WantSaveIniSettings = true;
+    配置.io.IniFilename = nullptr;
     style.FramePadding = ImVec2(16, 16);
     style.WindowRounding = 10.0f;
     style.FrameRounding = 5.0f;
@@ -219,7 +285,7 @@ void BeginDraw()
     style.GrabMinSize = 10.0f;
     // 窗体边框圆角
     style.WindowRounding = 10.0f;
-    if (ImGui::Begin("\tImGui Study 内存映射模板\t", NULL, 0))
+    if (ImGui::Begin(配置.悬浮窗标题.c_str(), NULL, 0))
     {
         g_window = ImGui::GetCurrentWindow();
         ImGui::SetWindowPos({15, 250}, ImGuiCond_Once);
@@ -240,7 +306,11 @@ void BeginDraw()
                         命令执行("kill -9 draw", false);
                     }
                 }
-
+                ImGui::SameLine(0,30);
+                if(ImGui::Button("功能全开"))
+                {
+                    绘制.血量=绘制.阵营=绘制.人数=绘制.帧率=绘制.昵称=绘制.背景=绘制.距离=绘制.射线=绘制.方框=绘制.背敌 = true;
+                }
                 ImGui::Checkbox("方框", &绘制.方框);
                 ImGui::SameLine();
                 ImGui::Checkbox("射线", &绘制.射线);
@@ -255,14 +325,11 @@ void BeginDraw()
                 ImGui::SameLine();
                 ImGui::Checkbox("人数", &绘制.人数);
                 ImGui::SameLine();
-                ImGui::Checkbox("骨骼", &绘制.骨骼);
-
-                ImGui::Checkbox("雷达", &绘制.雷达);
-                ImGui::SameLine();
-                ImGui::Checkbox("观战", &绘制.观战);
-                ImGui::SameLine();
                 ImGui::Checkbox("帧率", &绘制.帧率);
 
+                ImGui::Checkbox("背景", &绘制.背景);
+                ImGui::SameLine();
+                ImGui::Checkbox("背敌", &绘制.背敌);
                 ImGui::ColorEdit4("方框颜色", (float *)&颜色.方框颜色);
                 ImGui::ColorEdit4("射线颜色", (float *)&颜色.真人射线颜色);
                 ImGui::ColorEdit4("骨骼颜色", (float *)&颜色.骨骼颜色);
@@ -295,7 +362,7 @@ void BeginDraw()
                 }
 
                 ImGui::Text("注意：绘制默认以手机最大帧率运行！部分设备限制！");
-                ImGui::Text("绘制耗时 %.3f ms (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+                ImGui::Text("绘制耗时 %.3f ms (%.1f FPS)", 1000.0f /  配置.io.Framerate,  配置.io.Framerate);
                 ImGui::Text("https://github.com/AYssu/ImGui_Mmap");
                 ImGui::Text("开源项目为Android Studio 移植参考手机开源版本");
 
@@ -321,7 +388,7 @@ Java_com_empty_open_GLES3JNIView_step(JNIEnv *env, jclass obj)
 
     BeginDraw();
 
-    if (g_Initialized)
+    if (g_Initialized&&绘制.初始化)
     {
         ESP();
     }
@@ -374,11 +441,11 @@ Java_com_empty_open_MainActivity_LoadT3(JNIEnv *env, jobject thiz, jstring kami_
     T3_Json t3_Json{};
     if (isLogin)
     {
-        T3_LOAD(验证.url, 验证.base64, 验证.key, kami, imei, code, t3_Json);
+        T3_LogIn(验证.url, 验证.base64, 验证.key, kami, imei, code, t3_Json);
     }
     else
     {
-        T3_LOAD(验证.unurl, 验证.base64, 验证.key, kami, imei, code, t3_Json);
+        T3_LogIn(验证.unurl, 验证.base64, 验证.key, kami, imei, code, t3_Json);
     }
     char *tips = (char *)malloc(4096);
     if (!t3_Json.isLogin)
@@ -399,6 +466,13 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_empty_open_MainActivity_init(JNIEnv *env, jobject thiz, jstring dir)
 {
     // TODO: implement init()
+    if (Mem_isRoot())
+    {
+        配置.悬浮窗标题 = "ImGui Study 内存映射模板[Root]";
+    }else
+    {
+        配置.悬浮窗标题 = "ImGui Study 内存映射模板[框架]";
+    }
     配置.软件根目录库 = env->GetStringUTFChars(dir, JNI_FALSE);
     LOGD("加载软件根目录: %s", 配置.软件根目录库.c_str());
 }

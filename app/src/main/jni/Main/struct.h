@@ -4,6 +4,7 @@
 #define EMPTY_MSTRUCT
 
 #define maxplayerCount 100
+#define maxitemsCount 400
 #define PI 3.141592653589793238
 #include <stdio.h>
 #include <unistd.h>
@@ -146,7 +147,13 @@ struct Vector3A
     }
 };
 
-
+struct ItemData {
+    char ItemName[50];
+    float x;
+    float y;
+    float w;
+    float Distance;
+};
 struct PlayerData
 {
     char PlayerName[100];
@@ -167,7 +174,8 @@ struct Response
 {
     bool Success;
     int PlayerCount;
-
+    PlayerData Players[maxplayerCount];
+    ItemData Items[maxitemsCount];
 };
 
 

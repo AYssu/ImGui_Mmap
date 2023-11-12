@@ -3,7 +3,7 @@ LOCAL_PATH := $(call my-dir)
 # 加载静态库 包含mmap内存映射函数封装 T3网络验证封装
 include $(CLEAR_VARS)
 LOCAL_MODULE := Sea
-LOCAL_SRC_FILES := Static/libSea.a
+LOCAL_SRC_FILES := SeaTool/libSea.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
