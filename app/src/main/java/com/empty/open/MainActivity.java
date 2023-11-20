@@ -29,6 +29,7 @@ import androidx.core.app.ActivityCompat;
  * AIDE全解 带注释给小白学习用 学不会就算了
  *
  * @author 阿夜*/
+
 public class MainActivity extends AppCompatActivity {
 
     static {
