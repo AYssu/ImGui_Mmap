@@ -3,7 +3,8 @@
 #include "SeaTool/Sea.hpp"
 
 bool g_Initialized;
-Response *response;
+//Response *response;
+char *response = (char*) malloc(50000);
 // 绘制结构体
 ImGuiWindow *g_window = nullptr;
 char temp[888];
@@ -82,7 +83,8 @@ struct 数值结构体
 struct 绘制
 {
 
-    float 人物X, 人物Y, 人物W, 距离, 血量;
+    float 人物X, 人物Y, 人物W,人物H, 距离, 血量;
+    char 人物名称[100];
     int 人机, 阵营;
 
     float 头X, 头Y;         // 头部
@@ -148,25 +150,12 @@ Java_com_empty_open_GLES3JNIView_init(JNIEnv *env, jclass cls)
         i = ImColor(ImVec4((rand() % 205 + 50) / 255.f, rand() % 255 / 255.f, rand() % 225 / 225.f, 225 / 225.f));
     }
     // 随机队伍颜色
-
-    response = (Response *)build_mmap("/sdcard/Empty", false, sizeof(Response));
-    // 文件名 只读 结构体大小 只能使用指针结构体
-    memset(response,0, sizeof(Response));
-    //清空结构体
-    if (false)
-    {
-        response->PlayerCount=1;
-        sprintf(response->Players[0].PlayerName,"%s","阿夜1");
-        response->Players[0].x = 300;
-        response->Players[0].y = 400;
-        response->Players[0].w= 100;
-        response->Players[0].Distance = 78.2f;
-        response->Players[0].TeamID = 2;
-        response->Players[0].Health = 88;
-        response->Players[0].isBot = 0;
-
-    }
+    response = (char*) build_mmap("/sdcard/b.log",false,50000);
+//    memset(response,0,50000);
+    //注意映射b.log 无file的io流读写 效率很高 不要觉得是b.log就一定慢 看你如何把数据拿到而已 b.log映射自然没有结构体映射快 多了对文本的处理 没法避免
+    //b.log 映射对与小白很友好 这个不用多说 只需要改大概两个地方就你和传统的b.log一样用
     //  设置ImGui风格
+
     ImGui::StyleColorsLight();
 
     ImGui_ImplAndroid_Init();
@@ -207,15 +196,32 @@ void ESP()
 {
     int 真人 = 0, 人机 = 0;
 
-    for (int i = 0; i < response->PlayerCount; i++)
+    std::stringstream ss(response);
+    std::string segment;
+    std::string subSegment;
+    // 首先通过;分割字符串
+
+    while(std::getline(ss, segment, ';'))
     {
-        人物数据.人物X = response->Players[i].x;
-        人物数据.人物Y = response->Players[i].y;
-        人物数据.人物W = response->Players[i].w;
-        人物数据.血量 = response->Players[i].Health;
-        人物数据.人机 = response->Players[i].isBot;
-        人物数据.阵营 = 人物数据.人机 > 0 ? 0 : response->Players[i].TeamID;
-        人物数据.距离 = response->Players[i].Distance;
+        // 然后在每个分割出来的子字符串上再通过,分割
+        std::stringstream ss2(segment);
+        std::vector<std::string> list;
+        while(std::getline(ss2, subSegment, ',')) {
+            list.push_back(subSegment);
+        }
+
+        人物数据.人物X = std::stof(list[0]);
+        人物数据.人物Y = std::stof(list[1]);
+        人物数据.人物W = std::stof(list[2]);
+        人物数据.人物H = std::stof(list[3]);
+        人物数据.距离 = std::stof(list[4]);
+
+        人物数据.血量 = std::stof(list[5]);
+        人物数据.人机 = std::stod(list[6]);
+
+        人物数据.阵营 = 人物数据.人机 > 0 ? 0 : std::stof(list[7]);
+        sprintf(人物数据.人物名称,"%s",list[8].c_str());
+
         颜色.浅色透明度 = ImColor(ImVec4(颜色.随机颜色[人物数据.阵营].Value.x, 颜色.随机颜色[人物数据.阵营].Value.y, 颜色.随机颜色[人物数据.阵营].Value.z,0.8f));
         //获取随机颜色 换透明度
 
@@ -251,7 +257,7 @@ void ESP()
             if (绘制.昵称)
             {
                 if (人物数据.人机==0)
-                    AddText(配置.字体指针, 24,ImVec2(人物数据.人物X, (人物数据.人物Y - 人物数据.人物W) - 46.5),ImColor(255, 255, 255),response->Players[i].PlayerName);
+                    AddText(配置.字体指针, 24,ImVec2(人物数据.人物X, (人物数据.人物Y - 人物数据.人物W) - 46.5),ImColor(255, 255, 255),人物数据.人物名称);
                 else
                     AddText(配置.字体指针, 24,ImVec2(人物数据.人物X, (人物数据.人物Y - 人物数据.人物W) - 46.5),ImColor(255, 255, 255),"鸡哥");
 
@@ -266,7 +272,7 @@ void ESP()
 
             if (绘制.阵营)
             {
-                sprintf(temp,"%d",response->Players[i].TeamID);
+                sprintf(temp,"%d",人物数据.阵营);
                 AddText(配置.字体指针,23,ImVec2(人物数据.人物X - 110, (人物数据.人物Y-人物数据.人物W) - 46.5),ImColor(255,255,255),temp);
             }
 
@@ -342,24 +348,9 @@ void ESP()
         }
     }
 
-    if (绘制.物资)
-    {
-        for(int i = 0;i<response->ItemsCount;i++)
-        {
-            物资绘制.物资X = response->Items[i].x;
-            物资绘制.物资Y = response->Items[i].y;
-            物资绘制.物资W = response->Items[i].w;
-            物资绘制.物资X = 物资绘制.物资X + (物资绘制.物资W / 2); // 屏幕矫正半个身位
-            物资绘制.物资距离 = response->Items[i].Distance;
-            if (物资绘制.物资W > 0)
-            {
 
-                AddText(配置.字体指针, 27, ImVec2(物资绘制.物资X, 物资绘制.物资Y),ImColor(255,255,255), response->Items[i].ItemName);
 
-            }
-        }
-    }
-    // 绘制帧率
+
     if (绘制.帧率)
     {
         AddText(配置.字体指针, 30, ImVec2(100, 110), ImColor(255, 0, 0, 120), "阿夜映射插件");
@@ -369,7 +360,7 @@ void ESP()
     // 绘制人数 队伍
     if (绘制.人数)
     {
-        if (response->PlayerCount == 0)
+        if ((真人+人机) == 0)
         {
             AddText(配置.字体指针, 35, ImVec2(数值.屏幕X / 2, 数值.屏幕Y / 15), ImColor(0, 255, 0, 250), "安 全");
         }
@@ -423,12 +414,10 @@ void BeginDraw()
                     if (绘制.初始化)
                     {
                         命令执行("draw", true);
-                        response->Success = true;
                     }
                     else
                     {
                         命令执行("kill -9 draw", false);
-                        response->Success = false;
                     }
                 }
                 ImGui::SameLine(0,30);
