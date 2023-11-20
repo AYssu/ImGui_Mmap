@@ -164,6 +164,7 @@ Java_com_empty_open_GLES3JNIView_init(JNIEnv *env, jclass cls)
         response->Players[0].TeamID = 2;
         response->Players[0].Health = 88;
         response->Players[0].isBot = 0;
+
     }
     //  设置ImGui风格
     ImGui::StyleColorsLight();
@@ -422,10 +423,12 @@ void BeginDraw()
                     if (绘制.初始化)
                     {
                         命令执行("draw", true);
+                        response->Success = true;
                     }
                     else
                     {
                         命令执行("kill -9 draw", false);
+                        response->Success = false;
                     }
                 }
                 ImGui::SameLine(0,30);
