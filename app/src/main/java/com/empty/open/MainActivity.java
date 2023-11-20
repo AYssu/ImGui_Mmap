@@ -22,6 +22,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import java.io.File;
+
 /**
  * 该项目已在github开源 有兴趣的小伙伴欢迎给个 start
  * 2022.09.27
@@ -90,6 +92,11 @@ public class MainActivity extends AppCompatActivity {
         解绑控件 = findViewById(R.id.activitymainTextViewJB);
         卡密框 = findViewById(R.id.activitymainEditTextKM);
 
+        File file = new File("/sdcard/卡密信息");
+        if(file.exists())
+        {
+            卡密框.setText(Tools.文件读取("sdcard/卡密信息"));
+        }
         登录控件.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -128,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(() -> {
                     String result = LoadT3(卡密框.getText().toString(),android.provider.Settings.Secure.getString(MainActivity.this.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID),true);
                     Log.d(Tools.TAG,result);
-                    if (!result.contains("到期时间")) {
+                    if (!result.contains("到期时间")&&!result.contains("解绑成功")) {
                         loginHandler.sendEmptyMessage(0);
                     } else {
                         Message msg = new Message();
