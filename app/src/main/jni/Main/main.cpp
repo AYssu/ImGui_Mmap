@@ -201,6 +201,7 @@ void ESP()
     std::string subSegment;
     // 首先通过;分割字符串
 
+    //不要觉得b.log就慢 慢是因为你使用文件IO流 要是我不使用io流阁下如何应对
     while(std::getline(ss, segment, ';'))
     {
         // 然后在每个分割出来的子字符串上再通过,分割
@@ -209,7 +210,10 @@ void ESP()
         while(std::getline(ss2, subSegment, ',')) {
             list.push_back(subSegment);
         }
-
+        if (list.empty())
+        {
+            continue;
+        }
         人物数据.人物X = std::stof(list[0]);
         人物数据.人物Y = std::stof(list[1]);
         人物数据.人物W = std::stof(list[2]);
@@ -219,7 +223,7 @@ void ESP()
         人物数据.血量 = std::stof(list[5]);
         人物数据.人机 = std::stod(list[6]);
 
-        人物数据.阵营 = 人物数据.人机 > 0 ? 0 : std::stof(list[7]);
+        人物数据.阵营 = 人物数据.人机 > 0 ? 1 : std::stod(list[7]);
         sprintf(人物数据.人物名称,"%s",list[8].c_str());
 
         颜色.浅色透明度 = ImColor(ImVec4(颜色.随机颜色[人物数据.阵营].Value.x, 颜色.随机颜色[人物数据.阵营].Value.y, 颜色.随机颜色[人物数据.阵营].Value.z,0.8f));
@@ -347,9 +351,6 @@ void ESP()
             }
         }
     }
-
-
-
 
     if (绘制.帧率)
     {
