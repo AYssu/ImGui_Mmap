@@ -48,6 +48,7 @@ struct 绘制信息结构体
     bool 背景;
     bool 背敌;
     bool 物资;
+    bool 骨骼;
 
 } 绘制;
 
@@ -149,11 +150,11 @@ Java_com_empty_open_GLES3JNIView_init(JNIEnv *env, jclass cls)
     }
     // 随机队伍颜色
 
-    response = (Response *)build_mmap("/sdcard/Empty", false, sizeof(Response));
+    response = (Response *)build_mmap("/sdcard/PUBG.log", false, sizeof(Response));
     // 文件名 只读 结构体大小 只能使用指针结构体
     memset(response,0, sizeof(Response));
     //清空结构体
-    if (false)
+    if (true)
     {
         response->PlayerCount=1;
         sprintf(response->Players[0].PlayerName,"%s","阿夜1");
@@ -194,7 +195,6 @@ Java_com_empty_open_GLES3JNIView_resize(JNIEnv *env, jclass obj, jint width, jin
     ImGui::GetIO().DisplaySize = ImVec2((float)width, (float)height);
 }
 
-
 void AddText(ImFont *font, float font_size, ImVec2 pos, ImColor col, char *text_begin)
 {
     auto size = ImGui::CalcTextSize(text_begin);
@@ -216,6 +216,37 @@ void ESP()
         人物数据.人机 = response->Players[i].isBot;
         人物数据.阵营 = 人物数据.人机 > 0 ? 0 : response->Players[i].TeamID;
         人物数据.距离 = response->Players[i].Distance;
+        人物数据.头X = response->Players[i].Head.X;
+        人物数据.头Y = response->Players[i].Head.Y;
+        人物数据.胸部X = response->Players[i].Chest.X;
+        人物数据.胸部Y = response->Players[i].Chest.Y;
+        人物数据.臀部X = response->Players[i].Pelvis.X;
+        人物数据.臀部Y = response->Players[i].Pelvis.Y;
+        人物数据.左肩X = response->Players[i].Left_Shoulder.X;
+        人物数据.左肩Y = response->Players[i].Left_Shoulder.Y;
+        人物数据.右肩X = response->Players[i].Right_Shoulder.X;
+        人物数据.右肩Y = response->Players[i].Right_Shoulder.Y;
+        人物数据.左手肘X = response->Players[i].Left_Elbow.X;
+        人物数据.左手肘Y = response->Players[i].Left_Elbow.Y;
+        人物数据.右手肘X = response->Players[i].Right_Elbow.X;
+        人物数据.右手肘Y = response->Players[i].Right_Elbow.Y;
+        人物数据.左手腕X = response->Players[i].Left_Wrist.X;
+        人物数据.左手腕Y = response->Players[i].Left_Wrist.Y;
+        人物数据.右手腕X = response->Players[i].Right_Wrist.X;
+        人物数据.右手腕Y = response->Players[i].Right_Wrist.Y;
+        人物数据.左大腿X = response->Players[i].Left_Thigh.X;
+        人物数据.左大腿Y = response->Players[i].Left_Thigh.Y;
+        人物数据.右大腿X = response->Players[i].Right_Thigh.X;
+        人物数据.右大腿Y = response->Players[i].Right_Thigh.Y;
+        人物数据.左膝盖X = response->Players[i].Left_Knee.X;
+        人物数据.左膝盖Y = response->Players[i].Left_Knee.Y;
+        人物数据.右膝盖X = response->Players[i].Right_Knee.X;
+        人物数据.右膝盖Y = response->Players[i].Right_Knee.Y;
+        人物数据.左脚腕X = response->Players[i].Left_Ankle.X;
+        人物数据.左脚腕Y = response->Players[i].Left_Ankle.Y;
+        人物数据.右脚腕X = response->Players[i].Right_Ankle.X;
+        人物数据.右脚腕Y = response->Players[i].Right_Ankle.Y;
+
         颜色.浅色透明度 = ImColor(ImVec4(颜色.随机颜色[人物数据.阵营].Value.x, 颜色.随机颜色[人物数据.阵营].Value.y, 颜色.随机颜色[人物数据.阵营].Value.z,0.8f));
         //获取随机颜色 换透明度
 
@@ -270,6 +301,22 @@ void ESP()
                 AddText(配置.字体指针,23,ImVec2(人物数据.人物X - 110, (人物数据.人物Y-人物数据.人物W) - 46.5),ImColor(255,255,255),temp);
             }
 
+            if (绘制.骨骼)
+            {
+                ImGui::GetForegroundDrawList()->AddCircle({人物数据.头X, 人物数据.头Y}, 人物数据.人物W / 9, 颜色.骨骼颜色, 0, 2);
+                ImGui::GetForegroundDrawList()->AddLine({人物数据.胸部X, 人物数据.胸部Y}, {人物数据.左肩X, 人物数据.左肩Y},颜色.骨骼颜色, 2);
+                ImGui::GetForegroundDrawList()->AddLine({人物数据.胸部X, 人物数据.胸部Y}, {人物数据.右肩X, 人物数据.右肩Y}, 颜色.骨骼颜色, 2);
+                ImGui::GetForegroundDrawList()->AddLine({人物数据.左肩X, 人物数据.左肩Y}, {人物数据.左手肘X, 人物数据.左手肘Y}, 颜色.骨骼颜色, 2);
+                ImGui::GetForegroundDrawList()->AddLine({人物数据.左手肘X, 人物数据.左手肘Y}, {人物数据.左手腕X, 人物数据.左手腕Y}, 颜色.骨骼颜色, 2);
+                ImGui::GetForegroundDrawList()->AddLine({人物数据.右手肘X, 人物数据.右手肘Y}, {人物数据.右手腕X, 人物数据.右手腕Y}, 颜色.骨骼颜色, 2);
+                ImGui::GetForegroundDrawList()->AddLine({人物数据.胸部X, 人物数据.胸部Y}, {人物数据.臀部X, 人物数据.臀部Y}, 颜色.骨骼颜色, 2);
+                ImGui::GetForegroundDrawList()->AddLine({人物数据.臀部X, 人物数据.臀部Y}, {人物数据.左大腿X, 人物数据.左大腿Y}, 颜色.骨骼颜色, 2);
+                ImGui::GetForegroundDrawList()->AddLine({人物数据.臀部X, 人物数据.臀部Y}, {人物数据.右大腿X, 人物数据.右大腿Y},  颜色.骨骼颜色, 2);
+                ImGui::GetForegroundDrawList()->AddLine({人物数据.左大腿X, 人物数据.左大腿Y}, {人物数据.左膝盖X, 人物数据.左膝盖Y},  颜色.骨骼颜色, 2);
+                ImGui::GetForegroundDrawList()->AddLine({人物数据.右大腿X, 人物数据.右大腿Y}, {人物数据.右膝盖X, 人物数据.右膝盖Y},  颜色.骨骼颜色, 2);
+                ImGui::GetForegroundDrawList()->AddLine({人物数据.左膝盖X, 人物数据.左膝盖Y}, {人物数据.左脚腕X, 人物数据.左脚腕Y},  颜色.骨骼颜色, 2);
+                ImGui::GetForegroundDrawList()->AddLine({人物数据.右膝盖X, 人物数据.右膝盖Y}, {人物数据.右脚腕X, 人物数据.右脚腕Y},  颜色.骨骼颜色, 2);
+            }
             if (绘制.背敌)
             {
 
@@ -434,7 +481,7 @@ void BeginDraw()
                 ImGui::SameLine(0,30);
                 if(ImGui::Button("功能全开"))
                 {
-                    绘制.物资=绘制.血量=绘制.阵营=绘制.人数=绘制.帧率=绘制.昵称=绘制.背景=绘制.距离=绘制.射线=绘制.方框=绘制.背敌 = true;
+                    绘制.骨骼=绘制.物资=绘制.血量=绘制.阵营=绘制.人数=绘制.帧率=绘制.昵称=绘制.背景=绘制.距离=绘制.射线=绘制.方框=绘制.背敌 = true;
                 }
                 ImGui::Checkbox("方框", &绘制.方框);
                 ImGui::SameLine();
@@ -457,6 +504,8 @@ void BeginDraw()
                 ImGui::Checkbox("背敌", &绘制.背敌);
                 ImGui::SameLine();
                 ImGui::Checkbox("物资", &绘制.物资);
+                ImGui::SameLine();
+                ImGui::Checkbox("骨骼", &绘制.骨骼);
 
                 ImGui::ColorEdit4("方框颜色", (float *)&颜色.方框颜色);
                 ImGui::ColorEdit4("射线颜色", (float *)&颜色.真人射线颜色);
@@ -493,6 +542,7 @@ void BeginDraw()
                 ImGui::Text("绘制耗时 %.3f ms (%.1f FPS)", 1000.0f /  配置.io.Framerate,  配置.io.Framerate);
                 ImGui::Text("https://github.com/AYssu/ImGui_Mmap");
                 ImGui::Text("开源项目为Android Studio 移植参考手机开源版本");
+
 
                 ImGui::EndTabBar();
             }
@@ -603,7 +653,6 @@ Java_com_empty_open_MainActivity_LoadT3(JNIEnv *env, jobject thiz, jstring kami_
     }
     free(kami);
     free(imei);
-    LOGD("%s",tips);
     return env->NewStringUTF(tips);
 }
 

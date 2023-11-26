@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         解绑控件 = findViewById(R.id.activitymainTextViewJB);
         卡密框 = findViewById(R.id.activitymainEditTextKM);
 
+        卡密框.setText("DEMOY1F83C94DE78107A74F326A1CB84");
         登录控件.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

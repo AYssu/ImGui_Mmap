@@ -4,7 +4,7 @@
 #define EMPTY_MSTRUCT
 
 #define maxplayerCount 100
-#define maxitemsCount 400
+#define maxitemsCount 4000
 #define PI 3.141592653589793238
 #include <stdio.h>
 #include <unistd.h>
@@ -129,22 +129,42 @@ struct Vector2A
 struct Vector3A
 {
     float X;
-    float Z;
     float Y;
+    float Z;
 
     Vector3A()
     {
         this->X = 0;
-        this->Z = 0;
         this->Y = 0;
+        this->Z = 0;
     }
 
-    Vector3A(float x, float z, float y)
+    Vector3A(float x, float y, float z)
     {
         this->X = x;
         this->Y = y;
         this->Z = z;
     }
+};
+struct FMatrix
+{
+    float M[4][4];
+};
+
+struct Quat
+{
+    float X;
+    float Y;
+    float Z;
+    float W;
+};
+
+struct FTransform
+{
+    Quat Rotation;
+    Vector3A Translation;
+    //	float chunk;
+    Vector3A Scale3D;
 };
 
 struct ItemData {
@@ -154,6 +174,7 @@ struct ItemData {
     float w;
     float Distance;
 };
+
 struct PlayerData
 {
     char PlayerName[100];
@@ -167,7 +188,24 @@ struct PlayerData
     float Unhealthy;
     float Health;
     float Distance;
-
+    Vector2A Radar;
+    Vector2A Head;
+    Vector2A Chest;
+    Vector2A Pelvis;
+    Vector2A Left_Shoulder;
+    Vector2A Right_Shoulder;
+    Vector2A Left_Elbow;
+    Vector2A Right_Elbow;
+    Vector2A Left_Wrist;
+    Vector2A Right_Wrist;
+    Vector2A Left_Thigh;
+    Vector2A Right_Thigh;
+    Vector2A Left_Knee;
+    Vector2A Right_Knee;
+    Vector2A Left_Ankle;
+    Vector2A Right_Ankle;
+    int handheld;
+    int bullet;
 };
 
 struct Response
@@ -177,7 +215,14 @@ struct Response
     int ItemsCount;
     PlayerData Players[maxplayerCount];
     ItemData Items[maxitemsCount];
+
 };
-
-
+struct SwitchData
+{
+    int IntIo[500] = {0};
+    bool BoolIo[500] = {0};
+    float FloatIo[500] = {0};
+    long LongIo[500] = {0};
+    char CharIo[50][5000] = {0};
+};
 #endif // EMPTY_MSTRUCT>
